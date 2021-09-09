@@ -19,6 +19,11 @@ build:
   # noarch: python
   skip: true  # [py<37]
 
+requirements:
+  build:
+    - patch     # [unix]
+    - m2-patch  # [win]
+
 # the outputs map the modin options on PyPI (see upstream definition
 # https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
 # from "modin[<option>]" to "modin-<option>" as a conda-forge package
