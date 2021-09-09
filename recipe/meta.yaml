@@ -92,7 +92,7 @@ outputs:
   - name: modin-ray
     build:
       # there is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2
-      skip: true  # [osx]
+      skip: true  # [not (win64 or linux64)]
     requirements:
       host:
         - python
