@@ -17,7 +17,6 @@ build:
   number: 1
   # noarch disabled because the recipe now has selector for Ray, see below
   # noarch: python
-  skip: true  # [py<37]
 
 requirements:
   build:
@@ -62,6 +61,7 @@ outputs:
 
   - name: modin-core
     build:
+      skip: true  # [py<37]
       script: python -m pip install . --no-deps --ignore-installed -vv
     requirements:
       host:
@@ -79,6 +79,7 @@ outputs:
 
   - name: modin-dask
     build:
+      skip: true  # [py<37]
     requirements:
       host:
         - python
@@ -98,6 +99,7 @@ outputs:
     build:
       # there is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2
       skip: true  # [not (win64 or linux64)]
+      skip: true  # [py<37]
     requirements:
       host:
         - python
@@ -117,6 +119,7 @@ outputs:
     build:
       # there is no OmniSci on anything but Linux for now
       skip: true  # [not linux64]
+      skip: true  # [py<37]
     requirements:
       host:
         - python
