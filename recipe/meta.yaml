@@ -1,5 +1,5 @@
 {% set name = "modin" %}
-{% set version = "0.10.0" %}
+{% set version = "0.10.2" %}
 
 package:
   name: modin
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 88ce4def4a1145d31d207be55b9c3ba914e084ccfebace1d52b03507df258fd2
+  sha256: 2feaf96a03423ab6ac012dd9e56fa29fb4c14ed858973f81f15b8fa1f701f717
 
 build:
   number: 0
@@ -22,9 +22,11 @@ requirements:
     - python
   run:
     - python
-    - pandas ==1.2.4
-    - dask >=2.12
-    - distributed >=2.12
+    - pandas ==1.3.2
+    - dask >=2.22
+    # - pyarrow 1.0
+    # - spreadsheet >=0.1.0
+    - distributed >=2.22
     # there is no Ray in conda-forge for MacOS yet, see https://github.com/conda-forge/ray-packages-feedstock/issues/2
     - ray-core >=1.4  # [win64 or linux64]
 
