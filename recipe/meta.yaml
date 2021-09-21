@@ -28,8 +28,11 @@ requirements:
 # from "modin[<option>]" to "modin-<option>" as a conda-forge package
 outputs:
   - name: modin-all
+    build:
+      skip: true  # [py<37]
     requirements:
       host:
+        - python
       run:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
@@ -48,8 +51,11 @@ outputs:
 
   # compatibility with packagename before split into options
   - name: modin
+    build:
+      skip: true  # [py<37]
     requirements:
       host:
+        - python
       run:
         - python
         # modin needs at least one engine; use dask as it is more light-weight than ray
