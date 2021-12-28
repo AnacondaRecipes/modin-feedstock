@@ -136,7 +136,7 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - pyarrow >=3.0
-        - pyomniscidbe =5.7.1=*3_cpu
+        - pyomniscidbe =5.7.1
     test:
       imports:
         - modin
