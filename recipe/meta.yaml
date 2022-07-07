@@ -16,9 +16,12 @@ source:
 
 build:
   number: 0
-  # noarch disabled because the recipe now has selector for Ray, see below
-  # noarch: python
   skip: true  # [py<38]
+
+requirements:
+  build:
+    - patch     # [unix]
+    - m2-patch  # [win]
 
 # the outputs map the modin options on PyPI (see upstream definition
 # https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
