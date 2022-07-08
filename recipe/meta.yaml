@@ -29,7 +29,7 @@ requirements:
 outputs:
   - name: modin-all
     build:
-      skip: true  # [py<37]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
@@ -52,7 +52,7 @@ outputs:
   # compatibility with packagename before split into options
   - name: modin
     build:
-      skip: true  # [py<37]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
@@ -67,12 +67,14 @@ outputs:
 
   - name: modin-core
     build:
-      skip: true  # [py<37]
+      skip: true  # [py<38]
       script: python -m pip install . --no-deps --ignore-installed -vv
     requirements:
       host:
         - pip
         - python
+        - setuptools
+        - wheel
       run:
         - python
         - packaging
@@ -85,10 +87,14 @@ outputs:
       imports:
         - modin
         - modin.pandas
+      commands:
+        - pip check
+      requires:
+        - pip
 
   - name: modin-dask
     build:
-      skip: true  # [py<37]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
@@ -139,7 +145,7 @@ outputs:
     build:
       # there is no OmniSci on anything but Linux for now
       skip: true  # [not linux64]
-      skip: true  # [py<37]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
