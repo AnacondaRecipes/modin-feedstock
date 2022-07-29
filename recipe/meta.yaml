@@ -1,4 +1,4 @@
-{% set version = "0.11.3" %}
+{% set version = "0.15.2" %}
 
 package:
   name: modin-packages
@@ -6,17 +6,17 @@ package:
 
 source:
   url: https://github.com/modin-project/modin/archive/refs/tags/{{ version }}.tar.gz
-  sha256: 1c1e5a94b86c56fd36b275e0af4495143c8f0d63a7ebcd87f9933a7c5174b08d
+  sha256: 576e17fa06622105be9cc57faa319c5e4a918a0ec456cedcb4ec03f16f72ada5
   patches:
     # Remove all requirements from setup.py - they should be handled here.
     # The point is to create a "patch failed" conflict when dependencies change
     # in upstream so this doesn't go unnoticed.
-    - patches/0001-Remove-all-dependencies-from-setup.py.patch
+    - patches/0001-Remove-some-dependencies-from-omnisci-env.yml-to-be-.patch
+    - patches/0002-Remove-dependencies-from-setup.py-to-be-handled-by-c.patch
 
 build:
   number: 0
-  # noarch disabled because the recipe now has selector for Ray, see below
-  # noarch: python
+  skip: true  # [py<38]
 
 requirements:
   build:
@@ -29,7 +29,7 @@ requirements:
 outputs:
   - name: modin-all
     build:
-      skip: true  # [py<37]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
@@ -37,13 +37,13 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
-        # ray does not have OSX builds yet
-        - {{ pin_subpackage('modin-ray', exact=True) }}           # [linux64 or win64]
+        # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
+        - {{ pin_subpackage('modin-ray', exact=True) }}           # [win64 and py<310]
         # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
-        - {{ pin_subpackage('modin-omnisci', exact=True) }}       # [linux64]
-        #- {{ pin_subpackage('modin-remote', exact=True) }}       # turned off for now, see below
-        #- {{ pin_subpackage('modin-spreadsheet', exact=True) }}  # turned off for now, see below
-        #- {{ pin_subpackage('modin-sql', exact=True) }}          # turned off for now, see below
+        - {{ pin_subpackage('modin-omnisci', exact=True) }}       # [linux and x86]
+        # - {{ pin_subpackage('modin-remote', exact=True) }}       # turned off for now, see below
+        # - {{ pin_subpackage('modin-spreadsheet', exact=True) }}  # turned off for now, see below
+        # - {{ pin_subpackage('modin-sql', exact=True) }}          # turned off for now, see below
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -52,7 +52,7 @@ outputs:
   # compatibility with packagename before split into options
   - name: modin
     build:
-      skip: true  # [py<37]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
@@ -67,33 +67,42 @@ outputs:
 
   - name: modin-core
     build:
-      skip: true  # [py<37]
+      skip: true  # [py<38]
       script: python -m pip install . --no-deps --ignore-installed -vv
     requirements:
       host:
         - pip
         - python
+        - setuptools
+        - wheel
       run:
         - python
         - packaging
-        - pandas ==1.3.4
-        - numpy >=1.16.5
+        - pandas ==1.4.3
+        - numpy >=1.18.5
+        - fsspec
+        - psutil
+        - setuptools # TODO: remove when logging metaclass is removed
     test:
       imports:
         - modin
         - modin.pandas
+      commands:
+        - pip check
+      requires:
+        - pip
 
   - name: modin-dask
     build:
-      skip: true  # [py<37]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
       run:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
-        - dask >=2.22.0
-        - distributed >=2.22.0
+        - dask >=2.22.0,<2022.2.0
+        - distributed >=2.22.0,<2022.2.0
     test:
       imports:
         - modin
@@ -103,20 +112,27 @@ outputs:
 
   - name: modin-ray
     build:
-      # there is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2
-      skip: true  # [not (win64 or linux64)]
-      skip: true  # [py<37]
+      # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
+      skip: true  # [not ((linux and x86) or win64)]
+      skip: true  # [py<38 or py>39]
     requirements:
       host:
         - python
       run:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
-        - ray-core >=1.4.0
+        # Pin ray to < 1.13.0 to work around GH#4564
+        # TODO(https://github.com/modin-project/modin/issues/4564): let ray go past 1.13.0.
+        - ray-default >=1.4.0,<1.13
+        # Following https://github.com/ray-project/ray/pull/25648, pin protobuf < 4,
+        # because versions >= 4.0.0 are incompatible with ray<1.13.0.
+        - protobuf <4
         # aioredis 2.x breaks Ray
         # ref: https://github.com/conda-forge/ray-packages-feedstock/issues/38
         - aioredis <2
-        - pyarrow >=1.0
+        - pyarrow >=4.0.1
+        # TODO: remove redis dependency pin when GH modin-project/#4398 is resolved
+        - redis-py >=3.5.0,<4.0.0
     test:
       imports:
         - modin
@@ -127,22 +143,37 @@ outputs:
   - name: modin-omnisci
     build:
       # there is no OmniSci on anything but Linux for now
-      skip: true  # [not linux64]
-      skip: true  # [py<37]
+      skip: true  # [not (linux and x86)]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
       run:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
-        - pyarrow >=3.0
-        - pyomniscidbe =5.7.1
+        # pyarrow included in pyomniscidbe 5.10.1 repacked version
+        # - pyarrow =6
+        - pyomniscidbe ==5.10.1
+      run_constrained:
+        # ------------------------------------------------------------------------
+        # repack of pyarrow 6.0.1 requires preventing installation with other 
+        # versions of pyarrow.
+        # ------------------------------------------------------------------------
+        - pyarrow ==6.0.1
     test:
+      requires:
+        - pytest
+        - numpy
+        - pandas
       imports:
         - modin
         - modin.pandas
+      source_files:
+        - modin/
+        - examples/data/
       commands:
-        - python -c "import modin.experimental.pandas as pd, modin.config as cfg; cfg.Engine.put('Native'); cfg.Backend.put('OmniSci'); df = pd.DataFrame([])"
+        - python -c "import modin.experimental.pandas as pd, modin.config as cfg; cfg.Engine.put('Native'); cfg.StorageFormat.put('OmniSci'); df = pd.DataFrame([])"
+        - cd modin/experimental/core/execution/native/implementations/omnisci_on_native/test/ && pytest test_dataframe.py
 
   - name: modin-sql
     build:
