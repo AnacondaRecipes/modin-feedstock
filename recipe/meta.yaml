@@ -37,8 +37,8 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
-        # ray does not have OSX builds yet
-        - {{ pin_subpackage('modin-ray', exact=True) }}           # [((linux and x86) or win64) and py<310]
+        # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
+        - {{ pin_subpackage('modin-ray', exact=True) }}           # [win64 and py<310]
         # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
         - {{ pin_subpackage('modin-omnisci', exact=True) }}       # [linux and x86]
         # - {{ pin_subpackage('modin-remote', exact=True) }}       # turned off for now, see below
