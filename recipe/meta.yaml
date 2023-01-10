@@ -112,7 +112,7 @@ outputs:
     build:
       # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
       skip: true  # [not ((linux and x86) or win64)]
-      skip: true  # [py<38 or py>39]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
