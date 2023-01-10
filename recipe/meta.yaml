@@ -37,7 +37,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
-        - {{ pin_subpackage('modin-ray', exact=True) }}           # [win64 and py<310]
+        - {{ pin_subpackage('modin-ray', exact=True) }}           # [win64]
         # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
         - {{ pin_subpackage('modin-omnisci', exact=True) }}       # [linux and x86]
         # - {{ pin_subpackage('modin-remote', exact=True) }}       # turned off for now, see below
@@ -111,7 +111,6 @@ outputs:
   - name: modin-ray
     build:
       # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
-      skip: true  # [not ((linux and x86) or win64)]
       skip: true  # [py<38]
     requirements:
       host:
@@ -122,8 +121,7 @@ outputs:
         - ray-default >=1.13.0
         # https://github.com/modin-project/modin/pull/5270#issuecomment-1331172629
         # workaround for https://github.com/conda/conda/issues/11744
-        - grpcio!=1.45.*
-        - grpcio!=1.46.*
+        - grpcio !=1.45.*,!=1.46.*
         - pyarrow
     test:
       imports:
