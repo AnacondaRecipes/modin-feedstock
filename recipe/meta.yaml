@@ -27,8 +27,6 @@ requirements:
 # from "modin[<option>]" to "modin-<option>" as a conda-forge package
 outputs:
   - name: modin-all
-    build:
-      skip: true  # [py<38]
     requirements:
       host:
         - python
@@ -37,7 +35,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
-        - {{ pin_subpackage('modin-ray', exact=True) }}            # [(linux and x86) or win64]
+        - {{ pin_subpackage('modin-ray', exact=True) }}             # [not osx and not (win and py>39)]
         # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
         - {{ pin_subpackage('modin-omnisci', exact=True) }}        # [linux and x86]
         # - {{ pin_subpackage('modin-remote', exact=True) }}       # turned off for now, see below
@@ -50,8 +48,6 @@ outputs:
 
   # compatibility with packagename before split into options
   - name: modin
-    build:
-      skip: true  # [py<38]
     requirements:
       host:
         - python
@@ -66,7 +62,6 @@ outputs:
 
   - name: modin-core
     build:
-      skip: true  # [py<38]
       script: python -m pip install . --no-deps --ignore-installed -vv
     requirements:
       host:
@@ -92,7 +87,7 @@ outputs:
 
   - name: modin-dask
     build:
-      skip: true  # [py<38]
+      skip: false  # workaround section to bring back pipelines
     requirements:
       host:
         - python
@@ -111,7 +106,7 @@ outputs:
   - name: modin-ray
     build:
       # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
-      skip: true  # [py<38 or not ((linux and x86) or win64)]
+      skip: true  # [osx or (win and py>39)]
     requirements:
       host:
         - python
@@ -133,8 +128,7 @@ outputs:
   - name: modin-omnisci
     build:
       # there is no OmniSci on anything but Linux for now
-      skip: true  # [not (linux and x86)]
-      skip: true  # [py<38]
+      skip: true  # [not linux or py<38]
     requirements:
       host:
         - python
