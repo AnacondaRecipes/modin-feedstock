@@ -128,7 +128,7 @@ outputs:
   - name: modin-omnisci
     build:
       # there is no OmniSci on anything but Linux for now
-      skip: true  # [not linux or py<38]
+      skip: true  # [not (linux and x86)]
     requirements:
       host:
         - python
