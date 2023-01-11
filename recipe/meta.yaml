@@ -28,6 +28,7 @@ requirements:
 outputs:
   - name: modin-core
     build:
+      skip: true  # [py<38]
       script: python -m pip install . --no-deps --ignore-installed -vv
     requirements:
       host:
@@ -89,6 +90,7 @@ outputs:
     build:
       # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
       skip: true  # [osx or (win and py>39)]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
@@ -111,6 +113,7 @@ outputs:
     build:
       # there is no OmniSci on anything but Linux for now
       skip: true  # [not (linux and x86)]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
