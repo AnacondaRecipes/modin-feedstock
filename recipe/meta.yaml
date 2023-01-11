@@ -157,6 +157,9 @@ outputs:
         - cd modin/experimental/core/execution/native/implementations/omnisci_on_native/test/ && pytest test_dataframe.py
 
   - name: modin-all
+    build:
+      # Until all of the modin-* packages are available in defaults, skipping the ray-all metapackage.
+      skip: true
     requirements:
       host:
         - python
