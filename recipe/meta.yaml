@@ -64,7 +64,7 @@ outputs:
 
   - name: modin-dask
     build:
-      skip: false  # workaround section to bring back pipelines
+      skip: true  # [py<38]
     requirements:
       host:
         - python
