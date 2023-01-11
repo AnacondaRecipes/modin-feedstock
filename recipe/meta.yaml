@@ -57,7 +57,7 @@ outputs:
       noarch: generic
     requirements:
       run:
-        - {{ pin_subpackage('modin-core', max_pin="x.x.x") }}
+        - {{ pin_subpackage('modin-core', exact=True) }}
     test:
       imports:
         - modin
@@ -99,8 +99,10 @@ outputs:
   - name: modin-ray
     build:
       # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
-      skip: true  # [osx or (win and py>39)]
-      skip: true  # [py<38]
+      skip: true  # [py<38]      
+      # skipping architectures that do not yet have bazel, ray-core, and ray-default, so only build for linux64 & win64
+      skip: true  # [osx]
+      skip: true  # [not (x86_64 or win)]
     requirements:
       host:
         - python
@@ -163,7 +165,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
-        - {{ pin_subpackage('modin-ray', exact=True) }}             # [not osx and not (win and py>39)]
+        - {{ pin_subpackage('modin-ray', exact=True) }}             # [not osx or (x86_64 or win)]
         # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
         - {{ pin_subpackage('modin-omnisci', exact=True) }}        # [linux and x86]
     test:
