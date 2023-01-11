@@ -165,7 +165,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
-        - {{ pin_subpackage('modin-ray', exact=True) }}             # [not osx or (x86_64 or win)]
+        - {{ pin_subpackage('modin-ray', exact=True) }}             # [(x86_64 or win) or not osx]
         # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
         - {{ pin_subpackage('modin-omnisci', exact=True) }}        # [linux and x86]
     test:
