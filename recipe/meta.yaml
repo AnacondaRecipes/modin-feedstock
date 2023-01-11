@@ -52,16 +52,6 @@ outputs:
       requires:
         - pip
 
-  - name: modin_core
-    build:
-      noarch: generic
-    requirements:
-      run:
-        - {{ pin_subpackage('modin-core', exact=True) }}
-    test:
-      imports:
-        - modin
-
   - name: modin-dask
     build:
       skip: true  # [py<38]
@@ -102,7 +92,7 @@ outputs:
       skip: true  # [py<38]      
       # skipping architectures that do not yet have bazel, ray-core, and ray-default, so only build for linux64 & win64
       skip: true  # [osx]
-      skip: true  # [not (x86_64 or win)]
+      skip: true  # [linux and (aarch64 or ppc64le or s390x)]
     requirements:
       host:
         - python
@@ -168,7 +158,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
-        - {{ pin_subpackage('modin-ray', exact=True) }}             # [(x86_64 or win) or not osx]
+        - {{ pin_subpackage('modin-ray', exact=True) }}             # [not (osx or (linux and (aarch64 or ppc64le or s390x)))]
         # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
         - {{ pin_subpackage('modin-omnisci', exact=True) }}        # [linux and x86]
     test:
