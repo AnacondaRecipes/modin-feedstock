@@ -48,6 +48,8 @@ outputs:
 
   # compatibility with packagename before split into options
   - name: modin
+    build:
+      noarch: python
     requirements:
       host:
         - python
