@@ -149,7 +149,7 @@ outputs:
   
   - name: modin-all
     build:
-      # Until all of the modin-* packages are available in defaults, skipping the ray-all metapackage.
+      # Until all of the modin-* packages are available in defaults, skipping the modin-all metapackage.
       skip: true
     requirements:
       host:
