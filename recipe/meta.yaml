@@ -52,6 +52,16 @@ outputs:
       requires:
         - pip
 
+  - name: modin_core
+    build:
+      noarch: generic
+    requirements:
+      run:
+        - {{ pin_subpackage('modin-core', max_pin="x.x.x") }}
+    test:
+      imports:
+        - modin
+
   - name: modin-dask
     build:
       skip: false  # workaround section to bring back pipelines
