@@ -26,39 +26,6 @@ requirements:
 # https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
 # from "modin[<option>]" to "modin-<option>" as a conda-forge package
 outputs:
-  - name: modin-all
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('modin-core', exact=True) }}
-        - {{ pin_subpackage('modin-dask', exact=True) }}
-        # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
-        - {{ pin_subpackage('modin-ray', exact=True) }}             # [not osx and not (win and py>39)]
-        # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
-        - {{ pin_subpackage('modin-omnisci', exact=True) }}        # [linux and x86]
-    test:
-      imports:
-        # dummy test; actual tests are in subpackages
-        - modin
-
-  # compatibility with packagename before split into options
-  - name: modin
-    build:
-      noarch: python
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        # modin needs at least one engine; use dask as it is more light-weight than ray
-        - {{ pin_subpackage('modin-dask', exact=True) }}
-    test:
-      imports:
-        - modin
-        - modin.pandas
-
   - name: modin-core
     build:
       script: python -m pip install . --no-deps --ignore-installed -vv
@@ -101,6 +68,22 @@ outputs:
         - modin.pandas
       commands:
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('Dask'); df = pd.DataFrame([])"
+
+  # compatibility with packagename before split into options
+  - name: modin
+    build:
+      skip: true  # [py<38]
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        # modin needs at least one engine; use dask as it is more light-weight than ray
+        - {{ pin_subpackage('modin-dask', exact=True) }}
+    test:
+      imports:
+        - modin
+        - modin.pandas
 
   - name: modin-ray
     build:
@@ -157,6 +140,23 @@ outputs:
       commands:
         - python -c "import modin.experimental.pandas as pd, modin.config as cfg; cfg.Engine.put('Native'); cfg.StorageFormat.put('OmniSci'); df = pd.DataFrame([])"
         - cd modin/experimental/core/execution/native/implementations/omnisci_on_native/test/ && pytest test_dataframe.py
+
+  - name: modin-all
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('modin-core', exact=True) }}
+        - {{ pin_subpackage('modin-dask', exact=True) }}
+        # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
+        - {{ pin_subpackage('modin-ray', exact=True) }}             # [not osx and not (win and py>39)]
+        # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
+        - {{ pin_subpackage('modin-omnisci', exact=True) }}        # [linux and x86]
+    test:
+      imports:
+        # dummy test; actual tests are in subpackages
+        - modin
 
 about:
   home: https://github.com/modin-project/modin
