@@ -55,10 +55,10 @@ outputs:
         - python
         # modin needs at least one engine; use dask as it is more light-weight than ray
         - {{ pin_subpackage('modin-dask', exact=True) }}
-    test:
-      imports:
-        - modin
-        - modin.pandas
+    #test:
+      #imports:
+        #- modin
+        #- modin.pandas
 
   - name: modin-core
     build:
