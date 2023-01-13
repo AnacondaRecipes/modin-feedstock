@@ -38,7 +38,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray does not have OSX builds yet, also windows for py310 disabled, see gh-60
-        - {{ pin_subpackage('modin-ray', exact=True) }}           # [win64 and py<310]
+        - {{ pin_subpackage('modin-ray', exact=True) }}          # [not osx and not (win and py>39)]
     test:
       imports:
         # dummy test; actual tests are in subpackages
