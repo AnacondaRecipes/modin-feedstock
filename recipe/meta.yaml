@@ -38,7 +38,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray does not have OSX builds yet, also windows for py310 disabled, see gh-60
-        - {{ pin_subpackage('modin-ray', exact=True) }}          # [not osx and not (win and py>39)]
+        - {{ pin_subpackage('modin-ray', exact=True) }}          # [not osx or not (win and py>39)]
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -109,7 +109,7 @@ outputs:
     build:
       # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
       skip: true  # [not ((linux and x86) or win64)]
-      skip: true  # [py<38 or py>39]
+      skip: true  # [py<38]
     requirements:
       host:
         - python
