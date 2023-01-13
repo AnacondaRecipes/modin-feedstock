@@ -3,3 +3,6 @@ build_parameters:
 
 channels:
   - sk_test
+
+upload_channels:
+  - sk_test
