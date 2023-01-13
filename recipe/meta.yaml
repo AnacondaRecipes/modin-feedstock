@@ -37,10 +37,8 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
-        # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
+        # ray does not have OSX builds yet, also windows for py310 disabled, see gh-60
         - {{ pin_subpackage('modin-ray', exact=True) }}           # [win64 and py<310]
-        # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
-        - {{ pin_subpackage('modin-omnisci', exact=True) }}       # [linux and x86]
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -129,41 +127,6 @@ outputs:
         - modin.pandas
       commands:
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('Ray'); df = pd.DataFrame([])"
-
-  - name: modin-omnisci
-    build:
-      # there is no OmniSci on anything but Linux for now
-      skip: true  # [not (linux and x86)]
-      skip: true  # [py<38]
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('modin-core', exact=True) }}
-        # pyarrow included in pyomniscidbe 5.10.1 repacked version
-        # - pyarrow =6
-        - pyomniscidbe ==5.10.1
-      run_constrained:
-        # ------------------------------------------------------------------------
-        # repack of pyarrow 6.0.1 requires preventing installation with other 
-        # versions of pyarrow.
-        # ------------------------------------------------------------------------
-        - pyarrow ==6.0.1
-    test:
-      requires:
-        - pytest
-        - numpy
-        - pandas
-      imports:
-        - modin
-        - modin.pandas
-      source_files:
-        - modin/
-        - examples/data/
-      commands:
-        - python -c "import modin.experimental.pandas as pd, modin.config as cfg; cfg.Engine.put('Native'); cfg.StorageFormat.put('OmniSci'); df = pd.DataFrame([])"
-        - cd modin/experimental/core/execution/native/implementations/omnisci_on_native/test/ && pytest test_dataframe.py
 
   - name: modin-sql
     build:
