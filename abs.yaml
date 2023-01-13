@@ -4,5 +4,8 @@ build_parameters:
 channels:
   - sk_test
 
+channel_targets:
+  - sk_test
+
 upload_channels:
   - sk_test

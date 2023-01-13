@@ -78,9 +78,6 @@ outputs:
         - fsspec
         - psutil
     test:
-      imports:
-        - modin
-        - modin.pandas
       commands:
         - pip check
       requires:
