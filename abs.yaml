@@ -1,2 +1,5 @@
 build_parameters:
   - ""
+
+channels:
+  - sk_test
