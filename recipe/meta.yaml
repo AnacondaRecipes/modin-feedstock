@@ -1,5 +1,11 @@
 {% set version = "0.18.0" %}
 
+# for boostrapping we need to disable the ...modin
+# sub-packate. There is a cyclic dependency as its dependencies
+# require an prior built modin-core package.
+# This can be turned off until next version bump of airflow
+{% set without_modin_subpackage = true %}
+
 package:
   name: modin-packages
   version: {{ version }}
@@ -43,6 +49,7 @@ outputs:
         # dummy test; actual tests are in subpackages
         - modin
 
+{% if without_modin_subpackage != true %}
   # compatibility with packagename before split into options
   - name: modin
     build:
@@ -58,6 +65,7 @@ outputs:
       imports:
         - modin
         - modin.pandas
+{% endif %}
 
   - name: modin-core
     build:
