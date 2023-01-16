@@ -77,6 +77,9 @@ outputs:
         - fsspec
         - psutil
     test:
+      imports:
+        - modin
+        - modin.pandas
       commands:
         - pip check
       requires:
@@ -94,6 +97,9 @@ outputs:
         - dask >=2.22.0
         - distributed >=2.22.0
     test:
+      imports:
+        - modin
+        - modin.pandas
       commands:
         # Skip on ppc64le because of distributed.comm.core.CommClosedError
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('Dask'); df = pd.DataFrame([])"  # [not (linux and ppc64le)]
