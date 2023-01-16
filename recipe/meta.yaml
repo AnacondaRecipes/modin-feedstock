@@ -11,7 +11,6 @@ source:
     # Remove all requirements from setup.py - they should be handled here.
     # The point is to create a "patch failed" conflict when dependencies change
     # in upstream so this doesn't go unnoticed.
-    #- patches/0001-Remove-some-dependencies-from-omnisci-env.yml-to-be-.patch
     - patches/0002-Remove-dependencies-from-setup.py-to-be-handled-by-c.patch
 
 build:
@@ -55,10 +54,10 @@ outputs:
         - python
         # modin needs at least one engine; use dask as it is more light-weight than ray
         - {{ pin_subpackage('modin-dask', exact=True) }}
-    #test:
-      #imports:
-        #- modin
-        #- modin.pandas
+    test:
+      imports:
+        - modin
+        - modin.pandas
 
   - name: modin-core
     build:
