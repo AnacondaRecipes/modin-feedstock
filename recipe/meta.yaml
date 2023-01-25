@@ -12,11 +12,6 @@ build:
   number: 0
   skip: true  # [py<38]
 
-requirements:
-  build:
-    - patch     # [unix]
-    - m2-patch  # [win]
-
 # the outputs map the modin options on PyPI (see upstream definition
 # https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
 # from "modin[<option>]" to "modin-<option>" as a conda-forge package
@@ -31,7 +26,7 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
-        # ray does not have OSX builds yet, also windows for py310 disabled, see gh-60
+        # ray-default is only in defaults for linux-64 and win-64
         - {{ pin_subpackage('modin-ray', exact=True) }}  # [linux64 or win64]
     test:
       imports:
@@ -121,63 +116,6 @@ outputs:
         - modin.pandas
       commands:
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('Ray'); df = pd.DataFrame([])"
-
-  - name: modin-sql
-    build:
-      # Dependencies dfsql, mindsdb_sql are not in conda-forge yet.
-      skip: true
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('modin-core', exact=True) }}
-        - dfsql >=0.4.2
-        - pyparsing <=2.4.7
-    test:
-      imports:
-        # are there more specific imports?!
-        - modin
-
-  - name: modin-remote
-    build:
-      # Dependency rpyc is not in conda-forge yet.
-      # Also requires ray-autoscaler which is now absent because
-      # its dependencies on conda-forge are too ancient.
-      skip: true
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('modin-core', exact=True) }}
-        - boto3
-        - cloudpickle
-        - rpyc ==4.1.5
-    test:
-      imports:
-        # are there more specific imports?!
-        - modin
-
-  # TODO: bring https://pypi.org/project/modin-spreadsheet/ to conda-forge
-  # as modin-spreadsheet-core, leave modin-spreadsheet to be a subpackage here;
-  # see discussion with upstream developers here:
-  # https://github.com/conda-forge/modin-feedstock/pull/14/files#r595534632
-  - name: modin-spreadsheet
-    build:
-      # dependency modin-spreadsheet-core is not in conda-forge yet
-      skip: true
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('modin-core', exact=True) }}
-        - modin-spreadsheet >=0.1.0
-    test:
-      imports:
-        # are there more specific imports?!
-        - modin
 
 about:
   home: https://github.com/modin-project/modin
