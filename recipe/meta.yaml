@@ -17,13 +17,6 @@ requirements:
     - python
     - setuptools
     - wheel
-  run:
-    - python
-    - packaging
-    - pandas ==1.5.2
-    - numpy >=1.18.5
-    - fsspec
-    - psutil
 
 # the outputs map the modin options on PyPI (see upstream definition
 # https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
