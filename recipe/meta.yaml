@@ -1,4 +1,4 @@
-{% set version = "0.15.2" %}
+{% set version = "0.18.0" %}
 
 package:
   name: modin-packages
@@ -6,22 +6,17 @@ package:
 
 source:
   url: https://github.com/modin-project/modin/archive/refs/tags/{{ version }}.tar.gz
-  sha256: 576e17fa06622105be9cc57faa319c5e4a918a0ec456cedcb4ec03f16f72ada5
-  patches:
-    # Remove all requirements from setup.py - they should be handled here.
-    # The point is to create a "patch failed" conflict when dependencies change
-    # in upstream so this doesn't go unnoticed.
-    - patches/0001-Remove-some-dependencies-from-omnisci-env.yml-to-be-.patch
-    - patches/0002-Remove-dependencies-from-setup.py-to-be-handled-by-c.patch
+  sha256: 79eee6da579729fb00476e7ed7f32224a4242f779c9dfb49ed409d73f52cfe52
 
 build:
   number: 0
   skip: true  # [py<38]
-
 requirements:
-  build:
-    - patch     # [unix]
-    - m2-patch  # [win]
+  host:
+    - pip
+    - python
+    - setuptools
+    - wheel
 
 # the outputs map the modin options on PyPI (see upstream definition
 # https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
@@ -37,13 +32,8 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
-        # ray does not have OSX builds yet - modin-ray and modin-omnisci are mutually exclusive because of pyarrow 6.0.1
-        - {{ pin_subpackage('modin-ray', exact=True) }}           # [win64 and py<310]
-        # Note: modin-omnisci is conda-only, its dependencies were never published on PyPI
-        - {{ pin_subpackage('modin-omnisci', exact=True) }}       # [linux and x86]
-        # - {{ pin_subpackage('modin-remote', exact=True) }}       # turned off for now, see below
-        # - {{ pin_subpackage('modin-spreadsheet', exact=True) }}  # turned off for now, see below
-        # - {{ pin_subpackage('modin-sql', exact=True) }}          # turned off for now, see below
+        # ray-default is only in defaults for linux-64 and win-64
+        - {{ pin_subpackage('modin-ray', exact=True) }}  # [linux64 or win64]
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -78,19 +68,20 @@ outputs:
       run:
         - python
         - packaging
-        - pandas ==1.4.3
+        - pandas ==1.5.2
         - numpy >=1.18.5
         - fsspec
         - psutil
-        - setuptools # TODO: remove when logging metaclass is removed
     test:
       imports:
         - modin
         - modin.pandas
+      requires:
+        - distributed
+        - pip
       commands:
         - pip check
-      requires:
-        - pip
+        - python -c "from distributed import Client; import modin.pandas as pd; import numpy as np; frame_data = np.random.randint(0, 100, size=(2**10, 2**8)); df = pd.DataFrame(frame_data); print(df)"  # [not (linux and ppc64le)]
 
   - name: modin-dask
     build:
@@ -101,38 +92,32 @@ outputs:
       run:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
-        - dask >=2.22.0,<2022.2.0
-        - distributed >=2.22.0,<2022.2.0
+        - dask >=2.22.0
+        - distributed >=2.22.0
     test:
       imports:
         - modin
         - modin.pandas
       commands:
-        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('Dask'); df = pd.DataFrame([])"
+        # Skip on ppc64le because of distributed.comm.core.CommClosedError
+        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('Dask'); df = pd.DataFrame([])"  # [not (linux and ppc64le)]
 
   - name: modin-ray
     build:
       # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
-      skip: true  # [not ((linux and x86) or win64)]
-      skip: true  # [py<38 or py>39]
+      skip: true  # [py<38]
+      skip: true  # [not (linux64 or win64)]
     requirements:
       host:
         - python
       run:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
-        # Pin ray to < 1.13.0 to work around GH#4564
-        # TODO(https://github.com/modin-project/modin/issues/4564): let ray go past 1.13.0.
-        - ray-default >=1.4.0,<1.13
-        # Following https://github.com/ray-project/ray/pull/25648, pin protobuf < 4,
-        # because versions >= 4.0.0 are incompatible with ray<1.13.0.
-        - protobuf <4
-        # aioredis 2.x breaks Ray
-        # ref: https://github.com/conda-forge/ray-packages-feedstock/issues/38
-        - aioredis <2
-        - pyarrow >=4.0.1
-        # TODO: remove redis dependency pin when GH modin-project/#4398 is resolved
-        - redis-py >=3.5.0,<4.0.0
+        - ray-default >=1.13.0
+        # https://github.com/modin-project/modin/pull/5270#issuecomment-1331172629
+        # workaround for https://github.com/conda/conda/issues/11744
+        - grpcio !=1.45.*,!=1.46.*
+        - pyarrow
     test:
       imports:
         - modin
@@ -140,104 +125,17 @@ outputs:
       commands:
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('Ray'); df = pd.DataFrame([])"
 
-  - name: modin-omnisci
-    build:
-      # there is no OmniSci on anything but Linux for now
-      skip: true  # [not (linux and x86)]
-      skip: true  # [py<38]
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('modin-core', exact=True) }}
-        # pyarrow included in pyomniscidbe 5.10.1 repacked version
-        # - pyarrow =6
-        - pyomniscidbe ==5.10.1
-      run_constrained:
-        # ------------------------------------------------------------------------
-        # repack of pyarrow 6.0.1 requires preventing installation with other 
-        # versions of pyarrow.
-        # ------------------------------------------------------------------------
-        - pyarrow ==6.0.1
-    test:
-      requires:
-        - pytest
-        - numpy
-        - pandas
-      imports:
-        - modin
-        - modin.pandas
-      source_files:
-        - modin/
-        - examples/data/
-      commands:
-        - python -c "import modin.experimental.pandas as pd, modin.config as cfg; cfg.Engine.put('Native'); cfg.StorageFormat.put('OmniSci'); df = pd.DataFrame([])"
-        - cd modin/experimental/core/execution/native/implementations/omnisci_on_native/test/ && pytest test_dataframe.py
-
-  - name: modin-sql
-    build:
-      # Dependencies dfsql, mindsdb_sql are not in conda-forge yet.
-      skip: true
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('modin-core', exact=True) }}
-        - dfsql >=0.4.2
-        - pyparsing <=2.4.7
-    test:
-      imports:
-        # are there more specific imports?!
-        - modin
-
-  - name: modin-remote
-    build:
-      # Dependency rpyc is not in conda-forge yet.
-      # Also requires ray-autoscaler which is now absent because
-      # its dependencies on conda-forge are too ancient.
-      skip: true
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('modin-core', exact=True) }}
-        - boto3
-        - cloudpickle
-        - rpyc ==4.1.5
-    test:
-      imports:
-        # are there more specific imports?!
-        - modin
-
-  # TODO: bring https://pypi.org/project/modin-spreadsheet/ to conda-forge
-  # as modin-spreadsheet-core, leave modin-spreadsheet to be a subpackage here;
-  # see discussion with upstream developers here:
-  # https://github.com/conda-forge/modin-feedstock/pull/14/files#r595534632
-  - name: modin-spreadsheet
-    build:
-      # dependency modin-spreadsheet-core is not in conda-forge yet
-      skip: true
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('modin-core', exact=True) }}
-        - modin-spreadsheet >=0.1.0
-    test:
-      imports:
-        # are there more specific imports?!
-        - modin
-
 about:
   home: https://github.com/modin-project/modin
   license: Apache-2.0
   license_family: Apache
   license_file: LICENSE
   summary: Speed up your Pandas workflows by changing a single line of code
+  description: |
+    Modin is a drop-in replacement for pandas. 
+    While pandas is single-threaded, Modin lets you instantly speed up your workflows 
+    by scaling pandas so it uses all of your cores. Modin works especially well on larger datasets, 
+    where pandas becomes painfully slow or runs out of memory.
   doc_url: https://modin.readthedocs.io/
   dev_url: https://github.com/modin-project/modin
 
