@@ -1,4 +1,4 @@
-{% set version = "0.18.0" %}
+{% set version = "0.20.1" %}
 
 package:
   name: modin-packages
@@ -6,7 +6,7 @@ package:
 
 source:
   url: https://github.com/modin-project/modin/archive/refs/tags/{{ version }}.tar.gz
-  sha256: 79eee6da579729fb00476e7ed7f32224a4242f779c9dfb49ed409d73f52cfe52
+  sha256: 6d5c3d0fd0ec370af7c8eeb3f1729765aee97d19d3ebaa79f70b9d94a061bae9
 
 build:
   number: 0
@@ -18,9 +18,9 @@ requirements:
     - setuptools
     - wheel
 
-# the outputs map the modin options on PyPI (see upstream definition
+# the outputs map the modin extras on PyPI (see upstream definition
 # https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
-# from "modin[<option>]" to "modin-<option>" as a conda-forge package
+# from "modin[<extra>]" to "modin-<extra>" as a conda-forge package.
 outputs:
   - name: modin-all
     build:
@@ -33,7 +33,8 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray-default is only in defaults for linux-64 and win-64
-        - {{ pin_subpackage('modin-ray', exact=True) }}  # [linux64 or win64]
+        # ray is not yet compatible with Python 3.11
+        - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<311 and (linux64 or win64)]
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -68,7 +69,7 @@ outputs:
       run:
         - python
         - packaging
-        - pandas ==1.5.2
+        - pandas ==1.5.3
         - numpy >=1.18.5
         - fsspec
         - psutil
@@ -106,7 +107,8 @@ outputs:
     build:
       # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
       skip: true  # [py<38]
-      skip: true  # [not (linux64 or win64)]
+      # ray is not yet compatible with Python 3.11
+      skip: true  # [not (linux64 or win64) or py>310]
     requirements:
       host:
         - python
