@@ -20,7 +20,7 @@ requirements:
 
 # the outputs map the modin extras on PyPI (see upstream definition
 # https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
-# from "modin[<extra>]" to "modin-<extra>" as a conda-forge package
+# from "modin[<extra>]" to "modin-<extra>" as a conda-forge package.
 outputs:
   - name: modin-all
     build:
