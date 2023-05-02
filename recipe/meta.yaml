@@ -33,7 +33,8 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray-default is only in defaults for linux-64 and win-64
-        - {{ pin_subpackage('modin-ray', exact=True) }}  # [linux64 or win64]
+        # ray is not yet compatible with Python 3.11
+        - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<311 and (linux64 or win64)]
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -106,7 +107,8 @@ outputs:
     build:
       # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
       skip: true  # [py<38]
-      skip: true  # [not (linux64 or win64)]
+      # ray is not yet compatible with Python 3.11
+      skip: true  # [not (linux64 or win64) or py>310]
     requirements:
       host:
         - python
