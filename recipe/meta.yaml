@@ -43,7 +43,7 @@ outputs:
   # compatibility with packagename before split into options
   - name: modin
     build:
-      skip: true  # [py<38]
+      skip: true  # [py<39]
     requirements:
       host:
         - python
@@ -58,8 +58,8 @@ outputs:
 
   - name: modin-core
     build:
-      skip: true  # [py<38]
-      script: python -m pip install . --no-deps --ignore-installed -vv
+      skip: true  # [py<39]
+      script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed -vv
     requirements:
       host:
         - pip
@@ -86,7 +86,7 @@ outputs:
 
   - name: modin-dask
     build:
-      skip: true  # [py<38]
+      skip: true  # [py<39]
     requirements:
       host:
         - python
@@ -105,10 +105,9 @@ outputs:
 
   - name: modin-ray
     build:
-      # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2.
-      skip: true  # [py<38]
-      # ray is not yet compatible with Python 3.11
-      skip: true  # [not (linux64 or win64) or py>310]
+      # ray-default isn't available on s390x or python 3.12
+      skip: true  # [py<39 or py>311]
+      skip: true  # [s390x]
     requirements:
       host:
         - python
