@@ -33,7 +33,8 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         # ray-default isn't available on s390x
-        - {{ pin_subpackage('modin-ray', exact=True) }}  # [not s390x]
+        # ray doesn't support 3.12 yet: https://github.com/ray-project/ray/issues/40211
+        - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<312 and (not s390x)]
     test:
       imports:
         # dummy test; actual tests are in subpackages
