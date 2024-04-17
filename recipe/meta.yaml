@@ -113,7 +113,7 @@ outputs:
       run:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
-        - ray-default >=1.13.0
+        - ray-default >=1.13.0,!=2.5.0
         - pydantic <2.0
         - pyarrow >=7.0.0
     test:
