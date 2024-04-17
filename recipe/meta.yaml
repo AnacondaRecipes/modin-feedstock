@@ -1,4 +1,4 @@
-{% set version = "0.20.1" %}
+{% set version = "0.26.1" %}
 
 package:
   name: modin-packages
@@ -6,7 +6,7 @@ package:
 
 source:
   url: https://github.com/modin-project/modin/archive/refs/tags/{{ version }}.tar.gz
-  sha256: 6d5c3d0fd0ec370af7c8eeb3f1729765aee97d19d3ebaa79f70b9d94a061bae9
+  sha256: acf18f492fd1b7f4fe59aee3a50310650adc6696586a70c0333ac6c160002407
 
 build:
   number: 0
