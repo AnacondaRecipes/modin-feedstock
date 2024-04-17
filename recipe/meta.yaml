@@ -10,7 +10,7 @@ source:
 
 build:
   number: 0
-  skip: true  # [py<38]
+  skip: true  # [py<39 or py>311]
 requirements:
   host:
     - pip
@@ -24,7 +24,7 @@ requirements:
 outputs:
   - name: modin-all
     build:
-      skip: true  # [py<38]
+      skip: true  # [py<39]
     requirements:
       host:
         - python
@@ -68,11 +68,11 @@ outputs:
         - wheel
       run:
         - python
-        - packaging
-        - pandas ==1.5.3
+        - packaging >=21.0
+        - pandas >=2.1,<2.2
         - numpy >=1.18.5
-        - fsspec
-        - psutil
+        - fsspec >=2022.05.0
+        - psutil >=5.8.0
     test:
       imports:
         - modin
@@ -115,10 +115,8 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - ray-default >=1.13.0
-        # https://github.com/modin-project/modin/pull/5270#issuecomment-1331172629
-        # workaround for https://github.com/conda/conda/issues/11744
-        - grpcio !=1.45.*,!=1.46.*
-        - pyarrow
+        - pydantic <2.0
+        - pyarrow >=7.0.0
     test:
       imports:
         - modin
