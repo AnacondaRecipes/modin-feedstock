@@ -7,11 +7,17 @@ package:
 source:
   url: https://github.com/modin-project/modin/archive/refs/tags/{{ version }}.tar.gz
   sha256: acf18f492fd1b7f4fe59aee3a50310650adc6696586a70c0333ac6c160002407
+  # The vendored versioneer.py uses deprecated configparser.SafeConfigParser, causing build to fail on 3.12
+  patches:  # [py>=312]
+    - update_versioneer.patch # [py>=312]
 
 build:
   number: 0
   skip: true  # [py<39]
 requirements:
+  build:  # [py>=312]
+    - patch  # [not win and py>=312]
+    - m2-patch  # [win and py>=312]
   host:
     - pip
     - python
