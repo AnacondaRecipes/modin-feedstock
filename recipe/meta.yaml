@@ -91,6 +91,8 @@ outputs:
         - modin.pandas
       requires:
         - pip
+        # moto not available on python 3.12
+        {% if py<312 %}
         - distributed >=2.22.0
         - dask >=2.22.0
         - pytest
@@ -100,11 +102,13 @@ outputs:
         - pyarrow >=7.0.0
         - s3fs >=2022.05.0
         - fastparquet >=0.8.1
-        - numexpr <2.9
+        - numexpr <2.8.5
+        {% endif %}
 
       commands:
         # Skip pip check on win due to strict dependency in docker-py
         - pip check  # [not win]
+        {% if py<312 %}
         # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.26.1/.github/workflows/ci.yml#L535
         - pytest modin/pandas/test/dataframe/test_binary.py modin/pandas/test/dataframe/test_iter.py  # [not win]
         - pytest modin/pandas/test/dataframe/test_reduce.py modin/pandas/test/dataframe/test_udf.py modin/pandas/test/dataframe/test_window.py modin/pandas/test/dataframe/test_pickle.py  # [not win]
@@ -114,6 +118,7 @@ outputs:
         - pytest modin/test/interchange/dataframe_protocol/test_general.py
         - pytest modin/test/interchange/dataframe_protocol/pandas/test_protocol.py
         - pytest modin/pandas/test/test_rolling.py
+        {% endif %}
 
   - name: modin-dask
     build:
