@@ -58,6 +58,10 @@ outputs:
         # modin needs at least one engine; use dask as it is more light-weight than ray
         - {{ pin_subpackage('modin-dask', exact=True) }}
     test:
+      requires:
+        - pip
+      commands:
+        - pip check
       imports:
         - modin
         - modin.pandas
@@ -99,7 +103,8 @@ outputs:
         - numexpr <2.9
 
       commands:
-        - pip check
+        # Skip pip check on win due to strict dependency in docker-py
+        - pip check  # [not win]
         # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.26.1/.github/workflows/ci.yml#L535
         - pytest modin/pandas/test/dataframe/test_binary.py modin/pandas/test/dataframe/test_iter.py  # [not win]
         - pytest modin/pandas/test/dataframe/test_reduce.py modin/pandas/test/dataframe/test_udf.py modin/pandas/test/dataframe/test_window.py modin/pandas/test/dataframe/test_pickle.py  # [not win]
