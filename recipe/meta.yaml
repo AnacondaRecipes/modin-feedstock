@@ -96,7 +96,7 @@ outputs:
         - pyarrow >=7.0.0
         - s3fs >=2022.05.0
         - fastparquet >=0.8.1
-        - numexpr <2.8.5
+        - numexpr <2.9
 
       commands:
         - pip check
