@@ -80,15 +80,35 @@ outputs:
         - fsspec >=2022.05.0
         - psutil >=5.8.0
     test:
+      source_files:
+        - modin
       imports:
         - modin
         - modin.pandas
       requires:
-        - distributed
         - pip
+        - distributed >=2.22.0
+        - dask >=2.22.0
+        - pytest
+        - moto >=4.1.0
+        - matplotlib-base >=3.6.1
+        - xarray >=2022.03.0
+        - pyarrow >=7.0.0
+        - s3fs >=2022.05.0
+        - fastparquet >=0.8.1
+        - numexpr <2.8.5
+
       commands:
         - pip check
-        - python -c "from distributed import Client; import modin.pandas as pd; import numpy as np; frame_data = np.random.randint(0, 100, size=(2**10, 2**8)); df = pd.DataFrame(frame_data); print(df)"
+        # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.26.1/.github/workflows/ci.yml#L535
+        - pytest modin/pandas/test/dataframe/test_binary.py modin/pandas/test/dataframe/test_iter.py  # [not win]
+        - pytest modin/pandas/test/dataframe/test_reduce.py modin/pandas/test/dataframe/test_udf.py modin/pandas/test/dataframe/test_window.py modin/pandas/test/dataframe/test_pickle.py  # [not win]
+        - pytest -m "not exclude_in_sanity" modin/pandas/test/test_series.py
+        - pytest -m "not exclude_in_sanity" modin/pandas/test/dataframe/test_map_metadata.py modin/pandas/test/test_expanding.py modin/pandas/test/test_reshape.py modin/pandas/test/test_general.py modin/pandas/test/test_concat.py  # [not win]
+        - pytest modin/pandas/test/test_concat.py
+        - pytest modin/test/interchange/dataframe_protocol/test_general.py
+        - pytest modin/test/interchange/dataframe_protocol/pandas/test_protocol.py
+        - pytest modin/pandas/test/test_rolling.py
 
   - name: modin-dask
     build:
