@@ -107,15 +107,11 @@ outputs:
         # Skip pip check on win due to strict dependency in docker-py
         - pip check  # [not win]
         # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.26.1/.github/workflows/ci.yml#L535
-        - pytest modin/pandas/test/dataframe/test_binary.py modin/pandas/test/dataframe/test_iter.py  # [not win]
         - pytest modin/pandas/test/dataframe/test_udf.py  # [py<312]
-        - pytest modin/pandas/test/dataframe/test_reduce.py modin/pandas/test/dataframe/test_window.py modin/pandas/test/dataframe/test_pickle.py  # [not win]
+        - pytest modin/pandas/test/dataframe/test_reduce.py modin/pandas/test/dataframe/test_window.py modin/pandas/test/dataframe/test_pickle.py modin/pandas/test/dataframe/test_binary.py modin/pandas/test/dataframe/test_iter.py  # [not win]
         - pytest -m "not exclude_in_sanity" modin/pandas/test/test_series.py
         - pytest -m "not exclude_in_sanity" modin/pandas/test/dataframe/test_map_metadata.py modin/pandas/test/test_expanding.py modin/pandas/test/test_reshape.py modin/pandas/test/test_general.py modin/pandas/test/test_concat.py  # [not win]
-        - pytest modin/pandas/test/test_concat.py
-        - pytest modin/test/interchange/dataframe_protocol/test_general.py
-        - pytest modin/test/interchange/dataframe_protocol/pandas/test_protocol.py
-        - pytest modin/pandas/test/test_rolling.py
+        - pytest modin/test/interchange/dataframe_protocol/test_general.py modin/pandas/test/test_concat.py modin/test/interchange/dataframe_protocol/pandas/test_protocol.py modin/pandas/test/test_rolling.py
 
   - name: modin-dask
     build:
