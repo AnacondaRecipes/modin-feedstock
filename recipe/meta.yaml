@@ -144,6 +144,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - ray-default >=1.13.0,!=2.5.0
         - pyarrow >=7.0.0
+        - async-timeout
     test:
       imports:
         - modin
