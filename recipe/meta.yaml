@@ -83,6 +83,11 @@ outputs:
         - numpy >=1.22.4,<2
         - fsspec >=2022.11.0
         - psutil >=5.8.0
+      run_constrained:
+      # numexpr 2.8.5 breaks pandas, see below for context:
+      # https://github.com/modin-project/modin/pull/7296
+      # https://github.com/modin-project/modin/issues/6469
+        - numexpr !=2.8.5
     test:
       source_files:
         - modin
