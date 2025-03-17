@@ -12,9 +12,6 @@ build:
   number: 0
   skip: true  # [py<39]
 requirements:
-  build:  # [py>=312]
-    - patch  # [not win and py>=312]
-    - m2-patch  # [win and py>=312]
   host:
     - pip
     - python
@@ -39,7 +36,7 @@ outputs:
         #- {{ pin_subpackage('modin-mpi', exact=True) }}
         # ray-default isn't available on s390x
         # ray doesn't support 3.13 yet: https://github.com/ray-project/ray/issues/47933
-        - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<313 and (not s390x)]
+        - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<313 or (not linux and s390x)]
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -141,7 +138,7 @@ outputs:
   - name: modin-ray
     build:
       # ray-default isn't available on s390x or python 3.13
-      skip: true  # [py<39 or py>312]
+      skip: true  # [py<39 or py>312 or (linux and s390x)]
     requirements:
       host:
         - python
@@ -153,7 +150,7 @@ outputs:
         - pyarrow >=10.0.1
         # ray-core is missing async-timeout.
         # Once that's fixed, we can remove this dependency.
-        #- async-timeout
+        - async-timeout
     test:
       imports:
         - modin
