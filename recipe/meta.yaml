@@ -133,7 +133,7 @@ outputs:
         - modin
         - modin.pandas
       commands:
-        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('dask'); cfg.StorageFormat.put('pandas'); df = pd.DataFrame([])"
+        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('dask'); df = pd.DataFrame([])"
 
   - name: modin-ray
     build:
@@ -159,7 +159,7 @@ outputs:
         # ray.init() can stuck at "Started a local Ray instance." on Windows, see https://github.com/ray-project/ray/issues/37373 and https://github.com/ray-project/ray/issues/46396
         # It's a RAM related issue, because you can get warnings like this on Unix:
         # 'UserWarning: The size of /dev/shm is too small (6133071872 bytes). The required size at least half of RAM (6804715520 bytes).'
-        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); cfg.StorageFormat.put('pandas'); df = pd.DataFrame([])"  # [not win]
+        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"  # [not win]
 
   - name: modin-mpi
     build:
