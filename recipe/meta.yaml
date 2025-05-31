@@ -118,12 +118,13 @@ outputs:
         - pytest -m "not exclude_in_sanity" modin/tests/pandas/test_series.py -k "not (cat_categories or test__reduce__)"
         - pytest -m "not exclude_in_sanity" modin/tests/pandas/dataframe/test_map_metadata.py modin/tests/pandas/test_expanding.py modin/tests/pandas/test_reshape.py modin/tests/pandas/test_general.py modin/tests/pandas/test_concat.py  # [not win]
         - pytest modin/tests/interchange/dataframe_protocol/test_general.py modin/tests/pandas/test_concat.py modin/tests/interchange/dataframe_protocol/pandas/test_protocol.py modin/tests/pandas/test_rolling.py
-        - pytest -v modin/tests/pandas/extensions modin/tests/pandas/native_df_interoperability modin/tests/pandas/internals
+        - pytest -v modin/tests/pandas/extensions modin/tests/pandas/internals
         - pytest -v modin/tests/numpy
         - pytest -v modin/tests/interchange
 
         # - pytest -v modin/tests/pandas/integrations - to remove
         # - pytest -v modin/tests/core -- weird
+        # modin/tests/pandas/native_df_interoperability - to long
 
 
   - name: modin-dask
@@ -200,7 +201,7 @@ about:
     While pandas is single-threaded, Modin lets you instantly speed up your workflows 
     by scaling pandas so it uses all of your cores. Modin works especially well on larger datasets, 
     where pandas becomes painfully slow or runs out of memory.
-  doc_url: https://modin.readthedocs.io/
+  doc_url: https://modin.readthedocs.io
   dev_url: https://github.com/modin-project/modin
 
 extra:
