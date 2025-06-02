@@ -37,13 +37,9 @@ outputs:
         # ray doesn't support 3.13 yet: https://github.com/ray-project/ray/issues/47933
         - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<313]
     test:
-      requires:
-        - typing_extensions
       imports:
+        # dummy test; actual tests are in subpackages
         - modin
-        - modin.pandas
-        - modin.config
-        - modin.core
 
   # compatibility with packagename before split into options
   - name: modin
