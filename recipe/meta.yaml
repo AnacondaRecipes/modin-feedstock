@@ -37,6 +37,8 @@ outputs:
         # ray doesn't support 3.13 yet: https://github.com/ray-project/ray/issues/47933
         - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<313]
     test:
+      requires:
+        - typing_extensions
       imports:
         - modin
         - modin.pandas
@@ -85,12 +87,12 @@ outputs:
         - fsspec >=2022.11.0
         - psutil >=5.8.0
       run_constrained:
-        - dataframe-api-compat >=0.2.7
-        - modin-spreadsheet >=0.1.0
         # numexpr 2.8.5 breaks pandas, see below for context:
         # https://github.com/modin-project/modin/pull/7296
         # https://github.com/modin-project/modin/issues/6469
         - numexpr !=2.8.5
+        - dataframe-api-compat >=0.2.7
+        - modin-spreadsheet >=0.1.0
     test:
       source_files:
         - modin
@@ -169,7 +171,9 @@ outputs:
         # ray.init() can stuck at "Started a local Ray instance." on Windows, see https://github.com/ray-project/ray/issues/37373 and https://github.com/ray-project/ray/issues/46396
         # It's a RAM related issue, because you can get warnings like this on Unix:
         # 'UserWarning: The size of /dev/shm is too small (6133071872 bytes). The required size at least half of RAM (6804715520 bytes).'
-        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"  # [not win]
+        # LINUX: Failed to register worker to Raylet: IOError: [RayletClient] Unable to register worker with raylet. No such file or directory worker_id=01000000ffffffffffffffffffffffffffffffffffffffffffffffff
+        # https://github.com/ray-project/ray/issues/30012
+        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"  # [not (win or linux)]
 
   - name: modin-mpi
     build:
