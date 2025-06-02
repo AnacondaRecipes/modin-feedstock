@@ -70,7 +70,7 @@ outputs:
   - name: modin-core
     build:
       skip: true  # [py<39]
-      script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed -vv
+      script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation --ignore-installed
     requirements:
       host:
         - pip
@@ -146,8 +146,8 @@ outputs:
 
   - name: modin-ray
     build:
-      # ray-default isn't available on linux or python 3.13
-      skip: true  # [py<39 or py>312 or linux]
+      # ray-default isn't available on python 3.13
+      skip: true  # [py<39 or py>312]
     requirements:
       host:
         - python
@@ -206,3 +206,6 @@ extra:
     - vnlitvinov
     - maksimbo1
   feedstock-name: modin
+  skip-lints:
+    - wrong_output_script_key
+    - invalid_url
