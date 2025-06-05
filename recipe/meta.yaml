@@ -1,7 +1,8 @@
+{% set name = "modin" %}
 {% set version = "0.33.1" %}
 
 package:
-  name: modin-packages
+  name: {{ name }}-packages
   version: {{ version }}
 
 source:
@@ -58,7 +59,7 @@ outputs:
         - typing_extensions
       commands:
         - pip check
-        - python -c "from importlib.metadata import version; assert(version('modin')=='{{ version }}')"
+        - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
       imports:
         - modin
         - modin.pandas
@@ -167,14 +168,13 @@ outputs:
         # ray.init() can stuck at "Started a local Ray instance." on Windows, see https://github.com/ray-project/ray/issues/37373 and https://github.com/ray-project/ray/issues/46396
         # It's a RAM related issue, because you can get warnings like this on Unix:
         # 'UserWarning: The size of /dev/shm is too small (6133071872 bytes). The required size at least half of RAM (6804715520 bytes).'
-        # LINUX: Failed to register worker to Raylet: IOError: [RayletClient] Unable to register worker with raylet. No such file or directory worker_id=01000000ffffffffffffffffffffffffffffffffffffffffffffffff
+        # LINUX: Failed to register worker to Raylet: IOError: [RayletClient] Unable to register worker with raylet.
         # https://github.com/ray-project/ray/issues/30012
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"  # [not (win or linux)]
 
   - name: modin-mpi
     build:
-      # unidist-packages-feedstock isn't available
-      skip: true
+      skip: true  # [py<39]
     requirements:
       run:
         - python
