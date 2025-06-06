@@ -24,8 +24,6 @@ requirements:
 # from "modin[<extra>]" to "modin-<extra>" as a conda-forge package.
 outputs:
   - name: modin-all
-    build:
-      skip: true  # [py<39]
     requirements:
       host:
         - python
@@ -44,8 +42,6 @@ outputs:
 
   # compatibility with packagename before split into options
   - name: modin
-    build:
-      skip: true  # [py<39]
     requirements:
       host:
         - python
@@ -67,9 +63,8 @@ outputs:
         - modin.core
 
   - name: modin-core
-    build:
-      skip: true  # [py<39]
-      script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation --ignore-installed
+    script: build_base.bat  # [win]
+    script: build_base.sh   # [not win]
     requirements:
       host:
         - pip
@@ -122,8 +117,6 @@ outputs:
         - pytest -v modin/tests/pandas/extensions modin/tests/pandas/internals modin/tests/interchange
 
   - name: modin-dask
-    build:
-      skip: true  # [py<39]
     requirements:
       host:
         - python
@@ -146,7 +139,7 @@ outputs:
   - name: modin-ray
     build:
       # ray-default isn't available on python 3.13
-      skip: true  # [py<39 or py>312]
+      skip: true  # [py>312]
     requirements:
       host:
         - python
@@ -173,8 +166,6 @@ outputs:
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"  # [not (win or linux)]
 
   - name: modin-mpi
-    build:
-      skip: true  # [py<39]
     requirements:
       run:
         - python
