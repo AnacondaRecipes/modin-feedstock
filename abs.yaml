@@ -1,3 +1,4 @@
 channels:
-  - https://staging.continuum.io/prefect/fs/unidist-packages-feedstock/pr1/5ed69d6
-  - https://staging.continuum.io/prefect/fs/mpi4py-feedstock/pr9/3929ed0
+  - https://staging.continuum.io/prefect/fs/unidist-packages-feedstock/pr1/b71d2ed
+  - https://staging.continuum.io/prefect/fs/hiredis-feedstock/pr2/8cb275f
+  - https://staging.continuum.io/prefect/fs/aioredis-feedstock/pr1/ceb353f

@@ -31,14 +31,14 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
-        # Disable modin-mpi bec unidist-packages-feedstock isn't available on the main channel
-        #- {{ pin_subpackage('modin-mpi', exact=True) }}
-        # ray doesn't support 3.13 yet: https://github.com/ray-project/ray/issues/47933
         - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<313]
+        - {{ pin_subpackage('modin-mpi', exact=True) }}
     test:
       imports:
-        # dummy test; actual tests are in subpackages
         - modin
+        - modin.pandas
+        - modin.config
+        - modin.core
 
   # compatibility with packagename before split into options
   - name: modin
@@ -138,7 +138,8 @@ outputs:
 
   - name: modin-ray
     build:
-      # ray-default isn't available on python 3.13
+      # Ray does not have builds for python>=3.13
+      # https://github.com/ray-project/ray/issues/47933
       skip: true  # [py>312]
     requirements:
       host:
@@ -200,7 +201,5 @@ extra:
     - h-vetinari
     - vnlitvinov
     - maksimbo1
-  feedstock-name: modin
   skip-lints:
-    - wrong_output_script_key
     - invalid_url
