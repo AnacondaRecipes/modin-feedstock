@@ -35,10 +35,8 @@ outputs:
         - {{ pin_subpackage('modin-mpi', exact=True) }}
     test:
       imports:
+        # dummy test; actual tests are in subpackages
         - modin
-        - modin.pandas
-        - modin.config
-        - modin.core
 
   # compatibility with packagename before split into options
   - name: modin
