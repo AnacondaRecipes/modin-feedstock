@@ -1,12 +1,13 @@
-{% set version = "0.32.0" %}
+{% set name = "modin" %}
+{% set version = "0.33.1" %}
 
 package:
-  name: modin-packages
+  name: {{ name }}-packages
   version: {{ version }}
 
 source:
-  url: https://github.com/modin-project/modin/archive/refs/tags/{{ version }}.tar.gz
-  sha256: f2ef11f384a7d47eb6680a2f6f4bbc3404fa6290163d36384032daff3837b063
+  url: https://github.com/modin-project/{{ name }}/archive/refs/tags/{{ version }}.tar.gz
+  sha256: e18fb1dc9ef2cd6e528fcacf20563a64b7dd148ccae118b2f6260bc5b5feefac
 
 build:
   number: 0
@@ -23,8 +24,6 @@ requirements:
 # from "modin[<extra>]" to "modin-<extra>" as a conda-forge package.
 outputs:
   - name: modin-all
-    build:
-      skip: true  # [py<39]
     requirements:
       host:
         - python
@@ -32,11 +31,8 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
-        # Disable modin-mpi bec unidist-packages-feedstock isn't available on the main channel
-        #- {{ pin_subpackage('modin-mpi', exact=True) }}
-        # ray-default isn't available on s390x
-        # ray doesn't support 3.13 yet: https://github.com/ray-project/ray/issues/47933
-        - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<313 and (not s390x)]
+        - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<313]
+        - {{ pin_subpackage('modin-mpi', exact=True) }}
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -44,8 +40,6 @@ outputs:
 
   # compatibility with packagename before split into options
   - name: modin
-    build:
-      skip: true  # [py<39]
     requirements:
       host:
         - python
@@ -56,16 +50,19 @@ outputs:
     test:
       requires:
         - pip
+        - typing_extensions
       commands:
         - pip check
+        - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
       imports:
         - modin
         - modin.pandas
+        - modin.config
+        - modin.core
 
   - name: modin-core
-    build:
-      skip: true  # [py<39]
-      script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed -vv
+    script: build_base.bat  # [win]
+    script: build_base.sh   # [not win]
     requirements:
       host:
         - pip
@@ -80,9 +77,9 @@ outputs:
         - fsspec >=2022.11.0
         - psutil >=5.8.0
       run_constrained:
-      # numexpr 2.8.5 breaks pandas, see below for context:
-      # https://github.com/modin-project/modin/pull/7296
-      # https://github.com/modin-project/modin/issues/6469
+        # numexpr 2.8.5 breaks pandas, see below for context:
+        # https://github.com/modin-project/modin/pull/7296
+        # https://github.com/modin-project/modin/issues/6469
         - numexpr !=2.8.5
         - dataframe-api-compat >=0.2.7
         - modin-spreadsheet >=0.1.0
@@ -92,6 +89,8 @@ outputs:
       imports:
         - modin
         - modin.pandas
+        - modin.config
+        - modin.core
       requires:
         - pip
         - distributed >=2.22.0
@@ -99,27 +98,39 @@ outputs:
         - pytest >=7.3.2
         - boto3
         - requests
-        - matplotlib-base >=3.6.3
+        - matplotlib >=3.6.3
         - xarray >=2022.03.0
         - pyarrow >=10.0.1
         - s3fs >=2022.11.0
-        - numexpr <2.8.5  # [py<312]
+        - numexpr !=2.8.5
         - scipy >=1.10
-
       commands:
-        # Skip pip check on win due to strict dependency in docker-py
-        - pip check  # [not win]
-        # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.26.1/.github/workflows/ci.yml#L535
-        - pytest modin/tests/pandas/dataframe/test_udf.py  # [py<312]
-        # Skip test__reduce__ and test_column_pickle[False] because they failed with AssertionsError and have underlying issues with the dask's distributed package.
-        - pytest modin/tests/pandas/dataframe/test_reduce.py modin/tests/pandas/dataframe/test_window.py modin/tests/pandas/dataframe/test_pickle.py -k "not (test__reduce__ or test_column_pickle[False])" modin/tests/pandas/dataframe/test_binary.py modin/tests/pandas/dataframe/test_iter.py  # [not win]
-        - pytest -m "not exclude_in_sanity" modin/tests/pandas/test_series.py -k "not (cat_categories or test__reduce__)"
-        - pytest -m "not exclude_in_sanity" modin/tests/pandas/dataframe/test_map_metadata.py modin/tests/pandas/test_expanding.py modin/tests/pandas/test_reshape.py modin/tests/pandas/test_general.py modin/tests/pandas/test_concat.py  # [not win]
-        - pytest modin/tests/interchange/dataframe_protocol/test_general.py modin/tests/pandas/test_concat.py modin/tests/interchange/dataframe_protocol/pandas/test_protocol.py modin/tests/pandas/test_rolling.py
+        - pip check
+        # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.33.1/.github/workflows/ci.yml#L640-L700
+        - pytest modin/tests/pandas/test_rolling.py
+        - pytest modin/tests/pandas/test_expanding.py
+        - pytest modin/tests/pandas/test_reshape.py
+        - pytest modin/tests/pandas/test_general.py
+        - pytest modin/tests/pandas/test_concat.py
+        - pytest modin/tests/pandas/internals
+        - pytest modin/tests/pandas/extensions
+        - pytest modin/tests/interchange
+        - pytest modin/tests/test_partition_api.py
+        - pytest modin/tests/pandas/dataframe/test_binary.py
+        - pytest modin/tests/pandas/dataframe/test_iter.py
+        - pytest modin/tests/pandas/dataframe/test_reduce.py
+        - pytest modin/tests/pandas/dataframe/test_window.py
+        - pytest -m "not exclude_in_sanity" modin/tests/pandas/dataframe/test_map_metadata.py
+        # test__reduce__ -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
+        - pytest -k "not test__reduce__" -m "not exclude_in_sanity" modin/tests/pandas/test_series.py
+        # test_aggregate_error_checking -> Failed: DID NOT WARN. No warnings of type (<class 'UserWarning'>,) were emitted.
+        - pytest -k "not test_aggregate_error_checking" modin/tests/pandas/dataframe/test_udf.py
+        # test__reduce__ / test_column_pickle[False] -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
+        - pytest -k "not (test__reduce__ or test_column_pickle[False])" modin/tests/pandas/dataframe/test_pickle.py
+        # distributed.client.FutureCancelledError: lambda-e573d03bd8c1f5ca9746a2d478b5dca7 cancelled for reason: unknown
+        # - pytest modin/tests/pandas/dataframe/test_default.py
 
   - name: modin-dask
-    build:
-      skip: true  # [py<39]
     requirements:
       host:
         - python
@@ -129,64 +140,69 @@ outputs:
         - dask >=2.22.0
         - distributed >=2.22.0
     test:
+      requires:
+        - typing_extensions
       imports:
         - modin
         - modin.pandas
+        - modin.config
+        - modin.core
       commands:
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('dask'); df = pd.DataFrame([])"
-
+  
   - name: modin-ray
     build:
-      # ray-default isn't available on s390x or python 3.13
-      skip: true  # [py<39 or py>312 or (linux and s390x)]
+      # current available version of ray(2.37.0) in channels, doesn't support py3.13
+      # https://github.com/ray-project/ray/blob/ray-2.37.0/python/setup.py#L30
+      skip: true  # [py>312]
     requirements:
       host:
         - python
       run:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
-        # ray 2.9 doesn't work with setuptools>=70;
-        - ray-default >=2.1.0,!=2.5.0,!=2.9
+        - ray-default >=2.10.0,<3
         - pyarrow >=10.0.1
-        # ray-core is missing async-timeout.
-        # Once that's fixed, we can remove this dependency.
-        - async-timeout
     test:
       imports:
         - modin
         - modin.pandas
+        - modin.config
+        - modin.core
       commands:
-        # ray.init() can stuck at "Started a local Ray instance." on Windows, see https://github.com/ray-project/ray/issues/37373 and https://github.com/ray-project/ray/issues/46396
-        # It's a RAM related issue, because you can get warnings like this on Unix:
-        # 'UserWarning: The size of /dev/shm is too small (6133071872 bytes). The required size at least half of RAM (6804715520 bytes).'
-        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"  # [not win]
+        - python -c "import os; os.environ['MODIN_CPUS'] = '4'; import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"
 
   - name: modin-mpi
-    build:
-      # unidist-packages-feedstock isn't available
-      skip: true
     requirements:
+      host:
+        - python
       run:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - unidist-mpi >=0.2.1
     test:
+      requires:
+        - typing_extensions
       imports:
         - modin
         - modin.pandas
+        - modin.config
+        - modin.core
+      # Hard to run tests for modin-mpi due to config
+      # https://github.com/modin-project/modin/blob/0.33.1/.github/workflows/ci.yml#L601-L602
 
 about:
   home: https://github.com/modin-project/modin
   license: Apache-2.0
   license_family: Apache
   license_file: LICENSE
-  summary: Speed up your Pandas workflows by changing a single line of code
+  summary: Scale your pandas workflows by changing one line of code
   description: |
     Modin is a drop-in replacement for pandas.
     While pandas is single-threaded, Modin lets you instantly speed up your workflows 
     by scaling pandas so it uses all of your cores. Modin works especially well on larger datasets, 
     where pandas becomes painfully slow or runs out of memory.
-  doc_url: https://modin.readthedocs.io/
+  doc_url: https://modin.readthedocs.io
   dev_url: https://github.com/modin-project/modin
 
 extra:
@@ -195,4 +211,3 @@ extra:
     - h-vetinari
     - vnlitvinov
     - maksimbo1
-  feedstock-name: modin
