@@ -140,8 +140,8 @@ outputs:
         - dask >=2.22.0
         - distributed >=2.22.0
     test:
-      source_files:
-        - modin
+      requires:
+        - typing_extensions
       imports:
         - modin
         - modin.pandas
@@ -164,8 +164,6 @@ outputs:
         - ray-default >=2.10.0,<3
         - pyarrow >=10.0.1
     test:
-      source_files:
-        - modin
       imports:
         - modin
         - modin.pandas
