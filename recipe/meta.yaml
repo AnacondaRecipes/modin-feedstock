@@ -147,15 +147,6 @@ outputs:
         - modin.pandas
         - modin.config
         - modin.core
-      requires:
-        - pytest >=7.3.2
-        - requests
-        - typing_extensions
-        - boto3
-        - s3fs >=2022.11.0
-        - matplotlib >=3.6.3
-        - scipy >=1.10
-        - xarray >=2022.03.0
       commands:
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('dask'); df = pd.DataFrame([])"
   
@@ -180,13 +171,6 @@ outputs:
         - modin.pandas
         - modin.config
         - modin.core
-      requires:
-        - pytest >=7.3.2
-        - boto3
-        - s3fs >=2022.11.0
-        - matplotlib >=3.6.3
-        - scipy >=1.10
-        - xarray >=2022.03.0
       commands:
         - python -c "import os; os.environ['MODIN_CPUS'] = '4'; import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"
 
