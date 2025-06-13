@@ -120,6 +120,9 @@ outputs:
         - pytest modin/tests/pandas/dataframe/test_iter.py
         - pytest modin/tests/pandas/dataframe/test_reduce.py
         - pytest modin/tests/pandas/dataframe/test_window.py
+        - pytest -m "not exclude_in_sanity" modin/tests/pandas/dataframe/test_map_metadata.py
+        # test__reduce__ -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
+        - pytest -k "not test__reduce__" -m "not exclude_in_sanity" modin/tests/pandas/test_series.py
         # test_aggregate_error_checking -> Failed: DID NOT WARN. No warnings of type (<class 'UserWarning'>,) were emitted.
         - pytest -k "not test_aggregate_error_checking" modin/tests/pandas/dataframe/test_udf.py
         # test__reduce__ / test_column_pickle[False] -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
@@ -155,10 +158,6 @@ outputs:
         - xarray >=2022.03.0
       commands:
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('dask'); df = pd.DataFrame([])"
-        # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.33.1/.github/workflows/ci.yml#L670-L677
-        - pytest -m "not exclude_in_sanity" modin/tests/pandas/dataframe/test_map_metadata.py
-        # test__reduce__ -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
-        - pytest -k "not test__reduce__" -m "not exclude_in_sanity" modin/tests/pandas/test_series.py
   
   - name: modin-ray
     build:
@@ -190,9 +189,6 @@ outputs:
         - xarray >=2022.03.0
       commands:
         - python -c "import os; os.environ['MODIN_CPUS'] = '4'; import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"
-        # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.33.1/.github/workflows/ci.yml#L670-L677
-        - pytest modin/tests/pandas/test_series.py
-        - pytest modin/tests/pandas/dataframe/test_map_metadata.py
 
   - name: modin-mpi
     requirements:
