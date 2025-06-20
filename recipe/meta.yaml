@@ -1,5 +1,5 @@
 {% set name = "modin" %}
-{% set version = "0.33.1" %}
+{% set version = "0.33.2" %}
 
 package:
   name: {{ name }}-packages
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/modin-project/{{ name }}/archive/refs/tags/{{ version }}.tar.gz
-  sha256: e18fb1dc9ef2cd6e528fcacf20563a64b7dd148ccae118b2f6260bc5b5feefac
+  sha256: 6d463fff9dfe49ecd0456d977297b3e40f2a3a0790b1845011c9180ab8f08f4d
 
 build:
   number: 0
@@ -59,6 +59,13 @@ outputs:
         - modin.pandas
         - modin.config
         - modin.core
+        - modin.logging
+        - modin.polars
+        - modin.pandas
+        - modin.numpy
+        - modin.db_conn
+        - modin.distributed
+        - modin.error_message
 
   - name: modin-core
     script: build_base.bat  # [win]
@@ -91,6 +98,13 @@ outputs:
         - modin.pandas
         - modin.config
         - modin.core
+        - modin.logging
+        - modin.polars
+        - modin.pandas
+        - modin.numpy
+        - modin.db_conn
+        - modin.distributed
+        - modin.error_message
       requires:
         - pip
         - distributed >=2.22.0
@@ -147,6 +161,13 @@ outputs:
         - modin.pandas
         - modin.config
         - modin.core
+        - modin.logging
+        - modin.polars
+        - modin.pandas
+        - modin.numpy
+        - modin.db_conn
+        - modin.distributed
+        - modin.error_message
       commands:
         - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('dask'); df = pd.DataFrame([])"
   
@@ -169,6 +190,13 @@ outputs:
         - modin.pandas
         - modin.config
         - modin.core
+        - modin.logging
+        - modin.polars
+        - modin.pandas
+        - modin.numpy
+        - modin.db_conn
+        - modin.distributed
+        - modin.error_message
       commands:
         - python -c "import os; os.environ['MODIN_CPUS'] = '4'; import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"
 
@@ -188,6 +216,13 @@ outputs:
         - modin.pandas
         - modin.config
         - modin.core
+        - modin.logging
+        - modin.polars
+        - modin.pandas
+        - modin.numpy
+        - modin.db_conn
+        - modin.distributed
+        - modin.error_message
       # Hard to run tests for modin-mpi due to config
       # https://github.com/modin-project/modin/blob/0.33.1/.github/workflows/ci.yml#L601-L602
 
