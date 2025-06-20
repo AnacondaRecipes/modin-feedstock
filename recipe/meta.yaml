@@ -60,7 +60,6 @@ outputs:
         - modin.config
         - modin.core
         - modin.logging
-        - modin.polars
         - modin.pandas
         - modin.numpy
         - modin.db_conn
@@ -99,7 +98,6 @@ outputs:
         - modin.config
         - modin.core
         - modin.logging
-        - modin.polars
         - modin.pandas
         - modin.numpy
         - modin.db_conn
@@ -162,7 +160,6 @@ outputs:
         - modin.config
         - modin.core
         - modin.logging
-        - modin.polars
         - modin.pandas
         - modin.numpy
         - modin.db_conn
@@ -191,7 +188,6 @@ outputs:
         - modin.config
         - modin.core
         - modin.logging
-        - modin.polars
         - modin.pandas
         - modin.numpy
         - modin.db_conn
@@ -217,7 +213,6 @@ outputs:
         - modin.config
         - modin.core
         - modin.logging
-        - modin.polars
         - modin.pandas
         - modin.numpy
         - modin.db_conn
