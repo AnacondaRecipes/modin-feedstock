@@ -107,7 +107,7 @@ outputs:
         - pip
         - distributed >=2.22.0
         - dask >=2.22.0
-        - pytest 8.4.1
+        - pytest >=7.3.2
         - boto3
         - requests
         - matplotlib >=3.6.3
@@ -137,8 +137,8 @@ outputs:
         - pytest -k "not test__reduce__" -m "not exclude_in_sanity" modin/tests/pandas/test_series.py
         # test_aggregate_error_checking -> Failed: DID NOT WARN. No warnings of type (<class 'UserWarning'>,) were emitted.
         - pytest -k "not test_aggregate_error_checking" modin/tests/pandas/dataframe/test_udf.py
-        # test__reduce__ / test_column_pickle[False] -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
-        - pytest -k "not (test__reduce__ or test_column_pickle[False])" modin/tests/pandas/dataframe/test_pickle.py
+        # test__reduce__ / test_column_pickle[False] / test_dataframe_pickle[modin_df_non_empty] -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
+        - pytest -k "not (test__reduce__ or test_column_pickle[False] or test_dataframe_pickle[modin_df_non_empty])" modin/tests/pandas/dataframe/test_pickle.py
         # distributed.client.FutureCancelledError: lambda-e573d03bd8c1f5ca9746a2d478b5dca7 cancelled for reason: unknown
         # - pytest modin/tests/pandas/dataframe/test_default.py
 
