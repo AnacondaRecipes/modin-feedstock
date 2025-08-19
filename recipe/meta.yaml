@@ -60,7 +60,6 @@ outputs:
         - modin.config
         - modin.core
         - modin.logging
-        - modin.pandas
         - modin.numpy
         - modin.db_conn
         - modin.distributed
@@ -98,7 +97,6 @@ outputs:
         - modin.config
         - modin.core
         - modin.logging
-        - modin.pandas
         - modin.numpy
         - modin.db_conn
         - modin.distributed
@@ -116,6 +114,7 @@ outputs:
         - s3fs >=2022.11.0
         - numexpr !=2.8.5
         - scipy >=1.10
+        - typing_extensions
       commands:
         - pip check
         # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.35.0/.github/workflows/ci.yml#L643-L704
@@ -160,7 +159,6 @@ outputs:
         - modin.config
         - modin.core
         - modin.logging
-        - modin.pandas
         - modin.numpy
         - modin.db_conn
         - modin.distributed
@@ -182,13 +180,14 @@ outputs:
         - ray-default >=2.10.0,<3
         - pyarrow >=10.0.1
     test:
+      requires:
+        - typing_extensions
       imports:
         - modin
         - modin.pandas
         - modin.config
         - modin.core
         - modin.logging
-        - modin.pandas
         - modin.numpy
         - modin.db_conn
         - modin.distributed
@@ -213,7 +212,6 @@ outputs:
         - modin.config
         - modin.core
         - modin.logging
-        - modin.pandas
         - modin.numpy
         - modin.db_conn
         - modin.distributed
