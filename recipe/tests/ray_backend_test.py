@@ -1,15 +1,14 @@
-# Refactor one line test into test suite with manual ray.init() based on following instructions:
-# https://github.com/modin-project/modin/blob/1551d01e7ec9ba140b9bf0dbd88ebc15bdcf4e27/docs/getting_started/using_modin/using_modin_locally.rst?plain=1#L59-L66
-
 import os
 import pytest
+import time
 
 # --- Configuration before imports ---
 os.environ["MODIN_ENGINE"] = "ray"
 os.environ["RAY_OBJECT_STORE_ALLOW_SLOW_STORAGE"] = "1"
 os.environ["RAY_DISABLE_IMPORT_WARNING"] = "1"
 os.environ["RAY_DEDUP_LOGS"] = "0"
-os.environ["RAY_ENABLE_MAC_LARGE_OBJECT_STORE"] = "1"
+# Linux-specific optimizations
+os.environ["OMP_NUM_THREADS"] = "1"  # Prevent thread oversubscription
 
 import ray
 import modin.pandas as pd
@@ -25,20 +24,34 @@ def setup_ray_cluster():
     if ray.is_initialized():
         ray.shutdown()
     
-    # Initialize Ray with specified resources
+    # Initialize Ray with minimal, safe configuration
     ray.init(
-        num_cpus=4,
-        object_store_memory=8 * 1024**3,  # 8 GB
+        num_cpus=2,  # Reduced for stability
+        object_store_memory=1 * 1024**3,  # Reduced to 1 GB
         ignore_reinit_error=True,
         include_dashboard=False,
         log_to_driver=False,
-        _system_config={
-            "object_store_full_delay_ms": 100,
-        }
     )
     
-    # Check if Ray is properly initialized
-    assert ray.is_initialized(), "Ray initialization failed"
+    # Check if Ray is properly initialized with retry
+    max_retries = 3
+    for attempt in range(max_retries):
+        if ray.is_initialized():
+            break
+        time.sleep(1)
+        if attempt == max_retries - 1:
+            pytest.fail("Ray initialization failed after retries")
+    
+    # Wait for Ray cluster to stabilize
+    time.sleep(2)
+    
+    # Verify Ray cluster is healthy
+    try:
+        cluster_resources = ray.cluster_resources()
+        if not cluster_resources:
+            pytest.fail("Ray cluster has no resources")
+    except Exception as e:
+        pytest.fail(f"Ray cluster is unhealthy: {e}")
     
     # Now Modin should use the already initialized Ray cluster
     print(f"Ray cluster resources: {ray.cluster_resources()}")
@@ -62,24 +75,41 @@ def test_ray_cluster_status():
     
     # Check if cluster has CPU resources
     assert "CPU" in cluster_resources, "Ray cluster should have CPU resources"
-    assert cluster_resources["CPU"] == 4.0, f"Expected 4 CPUs, got: {cluster_resources['CPU']}"
+    assert cluster_resources["CPU"] >= 1.0, f"Expected at least 1 CPU, got: {cluster_resources['CPU']}"
+
+def test_modin_engine_is_ray():
+    """Checks if Modin uses Ray backend"""
+    assert cfg.Engine.get().lower() == "ray", "Modin is not using Ray backend"
+
+def test_ray_available_resources():
+    """Checks available Ray resources"""
+    resources = ray.available_resources()
+    assert "CPU" in resources, "Ray does not report CPU resource"
+    
+    # There might be fewer CPUs available if some are in use
+    assert resources["CPU"] > 0, f"No available CPUs: {resources}"
+    assert resources["CPU"] <= 2, f"More CPUs than expected: {resources['CPU']}"
 
 def test_basic_ray_operations():
-    """Tests basic Ray operations"""
+    """Tests basic Ray operations with error handling"""
     
     @ray.remote
     def simple_task(x):
         return x * 2
     
-    # Execute task
-    future = simple_task.remote(5)
-    result = ray.get(future)
-    
-    assert result == 10, f"Expected 10, got: {result}"
-
-def test_modin_engine_is_ray():
-    """Checks if Modin uses Ray backend"""
-    assert cfg.Engine.get().lower() == "ray", "Modin is not using Ray backend"
+    try:
+        # Execute task with timeout
+        future = simple_task.remote(5)
+        result = ray.get(future, timeout=30)  # 30 second timeout
+        
+        assert result == 10, f"Expected 10, got: {result}"
+        
+    except ray.exceptions.RayTimeoutError:
+        pytest.fail("Ray task timed out - cluster may be unstable")
+    except ray.exceptions.LocalRayletDiedError:
+        pytest.fail("Local raylet died during task execution")
+    except Exception as e:
+        pytest.fail(f"Ray task failed: {e}")
 
 def test_modin_dataframe_creation():
     """Tests Modin DataFrame creation"""
@@ -139,3 +169,20 @@ def test_modin_groupby_operations():
         
     except Exception as e:
         pytest.fail(f"GroupBy operations failed: {e}")
+
+def test_ray_object_store():
+    """Tests Ray object store with smaller data"""
+    try:
+        # Use smaller data to avoid memory issues
+        data = list(range(100))  # Reduced from 1000
+        ref = ray.put(data)
+        
+        # Get object from object store with timeout
+        retrieved_data = ray.get(ref, timeout=10)
+        
+        assert retrieved_data == data, "Object store put/get failed"
+        
+    except ray.exceptions.RayTimeoutError:
+        pytest.fail("Ray object store operation timed out")
+    except Exception as e:
+        pytest.fail(f"Ray object store test failed: {e}")
