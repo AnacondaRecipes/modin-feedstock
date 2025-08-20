@@ -4,7 +4,8 @@ import pytest
 # --- configuration before importing modin ---
 os.environ["MODIN_ENGINE"] = "ray"   # force Modin to use Ray backend
 os.environ["MODIN_CPUS"] = "4"       # limit number of CPUs to 4
-os.environ["MODIN_MEMORY"] = str(4 * 1024**3)  # 4 GB
+os.environ["MODIN_MEMORY"] = str(16 * 1024**3)  # 16 GB
+os.environ["RAY_DASHBOARD_PORT"] = "0" # 0 means set free port
 
 import ray
 import modin.pandas as pd
