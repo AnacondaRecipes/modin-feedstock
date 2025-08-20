@@ -31,7 +31,7 @@ outputs:
         - python
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
-        - {{ pin_subpackage('modin-ray', exact=True) }}  # [py<313]
+        - {{ pin_subpackage('modin-ray', exact=True) }}
         - {{ pin_subpackage('modin-mpi', exact=True) }}
     test:
       imports:
@@ -170,10 +170,6 @@ outputs:
         - pytest -vv tests/dask_backend_test.py
   
   - name: modin-ray
-    build:
-      # current available version of ray(2.37.0) in channels, doesn't support py3.13
-      # https://github.com/ray-project/ray/blob/ray-2.37.0/python/setup.py#L30
-      skip: true  # [py>312]
     requirements:
       host:
         - python
