@@ -117,29 +117,29 @@ outputs:
         - typing_extensions
       commands:
         - pip check
-        # # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.35.0/.github/workflows/ci.yml#L643-L704
-        # - pytest modin/tests/pandas/test_rolling.py
-        # - pytest modin/tests/pandas/test_expanding.py
-        # - pytest modin/tests/pandas/test_reshape.py
-        # - pytest modin/tests/pandas/test_general.py
-        # - pytest modin/tests/pandas/test_concat.py
-        # - pytest modin/tests/pandas/internals
-        # - pytest modin/tests/pandas/extensions
-        # - pytest modin/tests/interchange
-        # - pytest modin/tests/test_partition_api.py
-        # - pytest modin/tests/pandas/dataframe/test_binary.py
-        # - pytest modin/tests/pandas/dataframe/test_iter.py
-        # - pytest modin/tests/pandas/dataframe/test_reduce.py
-        # - pytest modin/tests/pandas/dataframe/test_window.py
-        # - pytest -m "not exclude_in_sanity" modin/tests/pandas/dataframe/test_map_metadata.py
-        # # test__reduce__ -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
-        # - pytest -k "not test__reduce__" -m "not exclude_in_sanity" modin/tests/pandas/test_series.py
-        # # test_aggregate_error_checking -> Failed: DID NOT WARN. No warnings of type (<class 'UserWarning'>,) were emitted.
-        # - pytest -k "not test_aggregate_error_checking" modin/tests/pandas/dataframe/test_udf.py
-        # # test__reduce__ / test_column_pickle[False] / test_dataframe_pickle[modin_df_non_empty] -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
-        # - pytest -k "not (test__reduce__ or test_column_pickle[False] or test_dataframe_pickle[modin_df_non_empty])" modin/tests/pandas/dataframe/test_pickle.py
-        # # distributed.client.FutureCancelledError: lambda-e573d03bd8c1f5ca9746a2d478b5dca7 cancelled for reason: unknown
-        # # - pytest modin/tests/pandas/dataframe/test_default.py
+        # Running subset of tests sourced from https://github.com/modin-project/modin/blob/0.35.0/.github/workflows/ci.yml#L643-L704
+        - pytest modin/tests/pandas/test_rolling.py
+        - pytest modin/tests/pandas/test_expanding.py
+        - pytest modin/tests/pandas/test_reshape.py
+        - pytest modin/tests/pandas/test_general.py
+        - pytest modin/tests/pandas/test_concat.py
+        - pytest modin/tests/pandas/internals
+        - pytest modin/tests/pandas/extensions
+        - pytest modin/tests/interchange
+        - pytest modin/tests/test_partition_api.py
+        - pytest modin/tests/pandas/dataframe/test_binary.py
+        - pytest modin/tests/pandas/dataframe/test_iter.py
+        - pytest modin/tests/pandas/dataframe/test_reduce.py
+        - pytest modin/tests/pandas/dataframe/test_window.py
+        - pytest -m "not exclude_in_sanity" modin/tests/pandas/dataframe/test_map_metadata.py
+        # test__reduce__ -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
+        - pytest -k "not test__reduce__" -m "not exclude_in_sanity" modin/tests/pandas/test_series.py
+        # test_aggregate_error_checking -> Failed: DID NOT WARN. No warnings of type (<class 'UserWarning'>,) were emitted.
+        - pytest -k "not test_aggregate_error_checking" modin/tests/pandas/dataframe/test_udf.py
+        # test__reduce__ / test_column_pickle[False] / test_dataframe_pickle[modin_df_non_empty] -> Exception: AttributeError("'NoneType' object has no attribute 'id'")
+        - pytest -k "not (test__reduce__ or test_column_pickle[False] or test_dataframe_pickle[modin_df_non_empty])" modin/tests/pandas/dataframe/test_pickle.py
+        # distributed.client.FutureCancelledError: lambda-e573d03bd8c1f5ca9746a2d478b5dca7 cancelled for reason: unknown
+        # - pytest modin/tests/pandas/dataframe/test_default.py
 
   - name: modin-dask
     requirements:
@@ -151,11 +151,8 @@ outputs:
         - dask >=2.22.0
         - distributed >=2.22.0
     test:
-      files:
-        - tests
       requires:
         - typing_extensions
-        - pytest
       imports:
         - modin
         - modin.pandas
@@ -167,7 +164,7 @@ outputs:
         - modin.distributed
         - modin.error_message
       commands:
-        - pytest -vv tests/dask_backend_test.py
+        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('dask'); df = pd.DataFrame([])"
   
   - name: modin-ray
     requirements:
@@ -179,11 +176,8 @@ outputs:
         - ray-default >=2.10.0,<3
         - pyarrow >=10.0.1
     test:
-      files:
-        - tests
       requires:
         - typing_extensions
-        - pytest
       imports:
         - modin
         - modin.pandas
@@ -195,7 +189,7 @@ outputs:
         - modin.distributed
         - modin.error_message
       commands:
-        - pytest -vv tests/ray_backend_test.py
+        - python -c "import os; os.environ['MODIN_CPUS'] = '2'; import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"
 
   - name: modin-mpi
     requirements:
