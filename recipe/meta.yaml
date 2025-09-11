@@ -1,5 +1,5 @@
 {% set name = "modin" %}
-{% set version = "0.35.0" %}
+{% set version = "0.36.0" %}
 
 package:
   name: {{ name }}-packages
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/modin-project/{{ name }}/archive/refs/tags/{{ version }}.tar.gz
-  sha256: 8c76db60855e57f3334203a35983cee4a2d3bd37928e488fe8b6fc0c93d3ec6a
+  sha256: 0bb711cdd0b294cd47e81e3c5e96c584b45ceda2900aca8b802ad07cd11d0ea5
 
 build:
   number: 0
@@ -17,10 +17,9 @@ requirements:
     - pip
     - python
     - setuptools
-    - wheel
 
 # the outputs map the modin extras on PyPI (see upstream definition
-# https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
+# https://github.com/modin-project/modin/blob/0.36.0/setup.py#L60-L64)
 # from "modin[<extra>]" to "modin-<extra>" as a conda-forge package.
 outputs:
   - name: modin-all
@@ -73,7 +72,6 @@ outputs:
         - pip
         - python
         - setuptools
-        - wheel
       run:
         - python
         - packaging >=21.0
@@ -189,7 +187,8 @@ outputs:
         - modin.distributed
         - modin.error_message
       commands:
-        - python -c "import os; os.environ['MODIN_CPUS'] = '2'; import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"
+        # Only CI issue - Windows: IOError: [RayletClient] Unable to register worker with raylet. Unknown error worker_id=01000000ffffffffffffffffffffffffffffffffffffffffffffffff
+        - python -c "import os; os.environ['MODIN_CPUS'] = '2'; import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"  # [not win]
 
   - name: modin-mpi
     requirements:
@@ -217,8 +216,8 @@ outputs:
 
 about:
   home: https://github.com/modin-project/modin
-  license: Apache-2.0
-  license_family: Apache
+  license: Apache-2.0 AND BSD-3-Clause
+  license_family: Other
   license_file: LICENSE
   summary: Scale your pandas workflows by changing one line of code
   description: |
