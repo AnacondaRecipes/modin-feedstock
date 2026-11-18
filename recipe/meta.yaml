@@ -31,7 +31,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         - {{ pin_subpackage('modin-ray', exact=True) }}
-        - {{ pin_subpackage('modin-mpi', exact=True) }}
+        - {{ pin_subpackage('modin-mpi', exact=True) }}  # [not (win and arm64)]
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -192,6 +192,8 @@ outputs:
         - python -c "import os; os.environ['MODIN_CPUS'] = '2'; import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"  # [not win]
 
   - name: modin-mpi
+    build:
+      skip: true  # [win and arm64]
     requirements:
       host:
         - python
