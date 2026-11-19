@@ -107,7 +107,7 @@ outputs:
         - pytest >=7.3.2
         - boto3
         - requests
-        - matplotlib >=3.6.3
+        - matplotlib-base >=3.6.3
         - xarray >=2022.03.0
         - pyarrow >=10.0.1
         - s3fs >=2022.11.0
