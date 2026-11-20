@@ -10,7 +10,7 @@ source:
   sha256: da7f313a8a7ba5453d195b98ce7be2b25e66099693c117904aa2865606233702
 
 build:
-  number: 0
+  number: 1
   skip: true  # [py<39]
 requirements:
   host:
@@ -31,7 +31,7 @@ outputs:
         - {{ pin_subpackage('modin-core', exact=True) }}
         - {{ pin_subpackage('modin-dask', exact=True) }}
         - {{ pin_subpackage('modin-ray', exact=True) }}
-        - {{ pin_subpackage('modin-mpi', exact=True) }}
+        - {{ pin_subpackage('modin-mpi', exact=True) }}  # [not (win and arm64)]
     test:
       imports:
         # dummy test; actual tests are in subpackages
@@ -107,7 +107,7 @@ outputs:
         - pytest >=7.3.2
         - boto3
         - requests
-        - matplotlib >=3.6.3
+        - matplotlib-base >=3.6.3
         - xarray >=2022.03.0
         - pyarrow >=10.0.1
         - s3fs >=2022.11.0
@@ -192,6 +192,8 @@ outputs:
         - python -c "import os; os.environ['MODIN_CPUS'] = '2'; import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('ray'); df = pd.DataFrame([])"  # [not win]
 
   - name: modin-mpi
+    build:
+      skip: true  # [win and arm64]
     requirements:
       host:
         - python
